@@ -3,17 +3,30 @@
 export const IPC = {
   getShellVersion: 'dsh:get-shell-version',
   ping: 'dsh:ping',
+  getCoreVersion: 'dsh:get-core-version',
+  checkCoreUpdate: 'dsh:check-core-update',
+  applyCoreUpdate: 'dsh:apply-core-update',
+  toggleAutostart: 'dsh:toggle-autostart',
+  openConfigDir: 'dsh:open-config-dir',
 } as const
 
-/** dsh core versions the shell is tested against (warn-only gate for MVP). */
+/** dsh core versions the shell is tested against (warn-only gate). */
 export const SUPPORTED_DSH_PREFIX = '0.1.0'
 
-export const SHELL_VERSION = '0.1.0-mvp.1'
+export const SHELL_VERSION = '0.1.0-v1.0'
+
+/** The official core npm package the shell spawns. */
+export const CORE_PACKAGE = '@deepseek-ai/dsh'
+
+export const HOTKEY = 'CommandOrControl+Alt+D'
 
 export const DEFAULTS = {
   port: 3210,
   host: '127.0.0.1',
   closeToTray: true,
+  autostart: false,
+  /** generic feed URL for shell updates; empty => use electron-builder publish config (GitHub Releases) */
+  updateFeedUrl: '',
   windowWidth: 1280,
   windowHeight: 820,
   /** first-boot readiness timeout (ms) */

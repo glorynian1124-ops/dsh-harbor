@@ -15,3 +15,7 @@ nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
+publish:
+  provider: github
+  owner: glorynian1124-ops
+  repo: dsh-harbor

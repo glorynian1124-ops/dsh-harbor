@@ -7,6 +7,8 @@ export interface HarborConfig {
   port: number
   host: string
   closeToTray: boolean
+  autostart: boolean
+  updateFeedUrl?: string
   windowBounds?: { x?: number; y?: number; width: number; height: number }
   lastCoreVersion?: string
 }
@@ -18,6 +20,7 @@ export function loadConfig(): HarborConfig {
     port: DEFAULTS.port,
     host: DEFAULTS.host,
     closeToTray: DEFAULTS.closeToTray,
+    autostart: DEFAULTS.autostart,
   }
   try {
     const raw = fs.readFileSync(configPath(), 'utf8')

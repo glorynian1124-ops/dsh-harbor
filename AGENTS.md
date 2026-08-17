@@ -12,17 +12,27 @@ Self-built desktop shell for DeepSeek Harness. Codename: DSH Harbor (鲸港).
 
 ```sh
 cd shell
-npm install      # downloads electron + @deepseek-ai/dsh
+npm install      # downloads electron + @deepseek-ai/dsh (see .npmrc mirrors)
 npm run dev      # tsc + electron .
 npm run dev:watch  # shell hot-reload (rebuild + relaunch on src change)
 npm run dist     # NSIS installer into release/
 ```
 
+Also `start-harbor.bat` in the shell folder = double-click launcher (auto-installs deps on first run).
+
 The shell spawns the official dsh core (`node <dsh bin> --profile web --host 127.0.0.1 --port <config>`) and loads the official Web UI. Core port default 3210; config lives in Electron `userData/config.json`.
+
+## Modules (src/main)
+
+- `process-steward.ts` — spawn/health/crash-recovery/tree-kill of the core (L2 runtime)
+- `core-updater.ts` — npm registry check + local dep update + core restart (L2 update)
+- `shell-updater.ts` — electron-updater against GitHub Releases (L3 update, packaged only)
+- `version-gate.ts` — warn-only compatibility gate on core version
+- `window.ts` / `tray.ts` / `hotkey.ts` / `autostart.ts` / `config.ts` — shell chrome
 
 ## Principles (never violate)
 
 1. Shell/core separation — never vendor or modify the official DSH kernel/UI; spawn `dsh web` and `loadURL`.
 2. Preload bridge is whitelist-only (`window.dshDesktop`); no DOM injection, no `executeJavaScript`.
-3. Three independent update layers: UI content (official), core (npm), shell (electron-updater, planned).
+3. Three independent update layers: UI content (official), core (npm, `core-updater`), shell (electron-updater, `shell-updater`).
 4. Desktop capabilities belong in DSH cordis plugins via the api-gateway Typert remote, not in the shell.

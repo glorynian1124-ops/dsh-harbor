@@ -1,6 +1,6 @@
 {
   "name": "dsh-harbor",
-  "version": "0.1.0-mvp.1",
+  "version": "0.1.0-v1.0",
   "description": "DSH Harbor — DeepSeek Harness desktop shell (shell/core separation, three-layer hot updates, plugin ecosystem preserved)",
   "main": "dist/main/index.js",
   "license": "MIT",
@@ -9,10 +9,12 @@
     "dev": "npm run build && electron .",
     "dev:watch": "node scripts/dev-watch.mjs",
     "start": "electron .",
+    "pack": "npm run build && electron-builder --dir",
     "dist": "npm run build && electron-builder --win nsis"
   },
   "dependencies": {
-    "@deepseek-ai/dsh": "^0.1.0-rc.6"
+    "@deepseek-ai/dsh": "^0.1.0-rc.6",
+    "electron-updater": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

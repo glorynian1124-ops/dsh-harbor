@@ -31,6 +31,7 @@ export class ProcessSteward extends EventEmitter<StewardEvents> {
   private bootTimer: NodeJS.Timeout | null = null
   private url: string | null = null
   private spawnAttempt = 0
+  private lastCoreVersion: string | null = null
 
   constructor(private readonly options: StewardOptions) {
     super()
@@ -85,6 +86,10 @@ export class ProcessSteward extends EventEmitter<StewardEvents> {
     return this.url
   }
 
+  getCoreVersion(): string | null {
+    return this.lastCoreVersion
+  }
+
   getStatus(): string {
     if (this.url && this.child?.pid) return `running :${new URL(this.url).port} (pid ${this.child.pid})`
     if (this.child?.pid) return `starting (pid ${this.child.pid})`
@@ -115,8 +120,7 @@ export class ProcessSteward extends EventEmitter<StewardEvents> {
       if (m && !this.url) {
         this.url = `http://127.0.0.1:${m[1]}`
         this.waitUntilUp(this.url)
-      }
-    }
+      }    }
     this.child.stdout?.on('data', onData)
     this.child.stderr?.on('data', onData)
 
@@ -152,7 +156,10 @@ export class ProcessSteward extends EventEmitter<StewardEvents> {
     const run = this.spawnAttempt === 0 ? 'node' : process.execPath
     const env = this.spawnAttempt === 0 ? process.env : { ...process.env, ELECTRON_RUN_AS_NODE: '1' }
     execFile(run, [bin, '--version'], { env }, (_err, stdout) => {
-      if (stdout?.trim()) this.emit('core-version', stdout.trim())
+      if (stdout?.trim()) {
+        this.lastCoreVersion = stdout.trim()
+        this.emit('core-version', this.lastCoreVersion)
+      }
     })
   }
 

@@ -4,8 +4,13 @@ import * as path from 'node:path'
 export interface TrayActions {
   showWindow: () => void
   restartCore: () => void
+  checkCoreUpdate: () => void
+  toggleAutostart: () => void
+  checkShellUpdate: () => void
+  openConfigDir: () => void
   quit: () => void
   coreStatus: () => string
+  isAutostart: () => boolean
 }
 
 export function createTray(actions: TrayActions): Tray {
@@ -20,7 +25,14 @@ export function createTray(actions: TrayActions): Tray {
       Menu.buildFromTemplate([
         { label: '显示 DSH Harbor', click: actions.showWindow },
         { label: `核心状态：${actions.coreStatus()}`, enabled: false },
+        { type: 'separator' },
         { label: '重启核心', click: actions.restartCore },
+        { label: '检查核心更新（npm）', click: actions.checkCoreUpdate },
+        { type: 'separator' },
+        { label: '开机自启', type: 'checkbox', checked: actions.isAutostart(), click: actions.toggleAutostart },
+        { type: 'separator' },
+        { label: '检查壳更新', click: actions.checkShellUpdate },
+        { label: '打开配置目录', click: actions.openConfigDir },
         { type: 'separator' },
         { label: '退出', click: actions.quit },
       ]),
