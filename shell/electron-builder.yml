@@ -1,0 +1,17 @@
+appId: com.glorynian.dsh-harbor
+productName: DSH Harbor
+directories:
+  output: release
+files:
+  - dist/**
+  - package.json
+  - "!node_modules/.cache"
+asarUnpack:
+  - node_modules/@deepseek-ai/dsh/**
+win:
+  target:
+    - nsis
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
