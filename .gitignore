@@ -1,0 +1,16 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+out/
+release/
+
+# kernel: official deepseek-harness clone, synced from upstream, never vendored
+kernel/
+
+# misc
+*.log
+.DS_Store
+Thumbs.db
