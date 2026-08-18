@@ -7,6 +7,11 @@ files:
   - package.json
   - dsh-plugins/**
   - build/icon.png
+  # Force-include the whole @deepseek-ai scope: the dsh meta package declares
+  # many runtime provider packages as PEER dependencies (npm auto-installs
+  # peers, so dev works) but electron-builder's dependency walker prunes
+  # peers — the packaged core then dies with ERR_MODULE_NOT_FOUND.
+  - node_modules/@deepseek-ai/**
   - "!node_modules/.cache"
 # The shell spawns the dsh core as a CHILD node process (system Node), which
 # cannot read asar at all — so the ENTIRE node_modules tree must live unpacked
