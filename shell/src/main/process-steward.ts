@@ -3,12 +3,14 @@ import { EventEmitter } from 'node:events'
 import * as fs from 'node:fs'
 import * as http from 'node:http'
 import * as path from 'node:path'
-import { BRIDGE_PORT_ENV, DEFAULTS } from '../shared/constants'
+import { BRIDGE_PORT_ENV, DEFAULTS, SHELL_DIR_ENV } from '../shared/constants'
 
 export interface StewardOptions {
   port: number
   host: string
   bridgePort: number
+  /** absolute path of the shell directory, injected into the core via env */
+  shellDir: string
   patchPath?: string | null
 }
 
@@ -110,14 +112,21 @@ export class ProcessSteward extends EventEmitter<StewardEvents> {
 
     this.reportCoreVersion(bin)
 
-    const args = ['--profile', 'web', '--host', this.options.host, '--port', String(this.options.port)]
+    // IMPORTANT: launcher-level flags (--profile, --patch) must all precede the
+    // first token the launcher does not know (--host). Otherwise the launcher
+    // stops parsing there and passes --patch to the web app, which rejects it
+    // with "unknown option '--patch'" → instant core exit → restart loop.
+    const args = ['--profile', 'web']
     if (this.options.patchPath) {
       args.push('--patch', this.options.patchPath)
       console.log('[harbor] core boot patch:', this.options.patchPath)
     }
+    args.push('--host', this.options.host, '--port', String(this.options.port))
+
     const env: NodeJS.ProcessEnv = {
       ...process.env,
       [BRIDGE_PORT_ENV]: String(this.options.bridgePort),
+      [SHELL_DIR_ENV]: this.options.shellDir,
     }
 
     this.spawnAttempt = 0

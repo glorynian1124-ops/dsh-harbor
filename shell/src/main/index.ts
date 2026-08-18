@@ -67,14 +67,16 @@ function main(): void {
   app.whenReady().then(() => {
     win = createWindow(config)
     const bridgePort = config.bridgePort ?? DEFAULTS.bridgePort
+    const shellDir = app.getAppPath()
 
     // V2: desktop-bridge — generate the cordis patch and inject the bridge port
-    // into the core process so DSH plugins can call the desktop.
-    const patchPath = ensureDesktopBridgePatch(app.getAppPath(), app.getPath('userData'))
+    // + shell dir into the core process so DSH plugins can call the desktop.
+    const patchPath = ensureDesktopBridgePatch(shellDir, app.getPath('userData'))
     steward = new ProcessSteward({
       port: config.port,
       host: config.host,
       bridgePort,
+      shellDir,
       patchPath,
     })
     coreUpdater = new CoreUpdater(() => steward?.getCoreVersion() ?? null)

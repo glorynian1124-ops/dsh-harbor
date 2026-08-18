@@ -13,7 +13,7 @@ export const IPC = {
 /** dsh core versions the shell is tested against (warn-only gate). */
 export const SUPPORTED_DSH_PREFIX = '0.1.0'
 
-export const SHELL_VERSION = '0.2.0-v2.0'
+export const SHELL_VERSION = '0.2.0-v2.1'
 
 /** The official core npm package the shell spawns. */
 export const CORE_PACKAGE = '@deepseek-ai/dsh'
@@ -22,6 +22,9 @@ export const HOTKEY = 'CommandOrControl+Alt+D'
 
 /** Env var injected into the dsh core process: where the bridge listens. */
 export const BRIDGE_PORT_ENV = 'DSH_HARBOR_BRIDGE_PORT'
+
+/** Env var injected into the dsh core process: absolute shell directory. */
+export const SHELL_DIR_ENV = 'DSH_HARBOR_SHELL_DIR'
 
 export const DEFAULTS = {
   port: 3210,

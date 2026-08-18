@@ -8,6 +8,9 @@
  * Electron 壳的 bridge 服务（端口由环境变量 DSH_HARBOR_BRIDGE_PORT 注入，
  * 默认 3211）。壳是"哑窗户"的边界仍然成立：桥只转发，不注入 DOM。
  */
+import { createRequire } from 'node:module'
+import * as path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import type { Context } from '@deepseek-ai/cordis'
 // Side-effect type import: pulls in dsh-tools' Context augmentation (ctx.tools).
 import type {
@@ -42,22 +45,16 @@ type DefineToolFn = <const S extends ParameterSchemaSpec, const O extends ValueS
 ) => ToolDefinition
 
 /**
- * Load defineTool at runtime. Resolution order: the DSH loader's own require
- * first, then the shell's node_modules via process.cwd() (dev mode: the core
- * is spawned from the shell directory). Type-only imports are erased at
- * compile time, so no bare import is left in the emitted JS.
+ * Load defineTool synchronously. The plugin is executed as ESM by the DSH
+ * loader (no `require`), and the plugin directory has no node_modules of its
+ * own — so anchor a createRequire at the shell directory, which the shell
+ * injects deterministically via DSH_HARBOR_SHELL_DIR (cwd is not reliable).
  */
 function loadDefineTool(): DefineToolFn {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return require('@deepseek-ai/dsh-tools').defineTool as DefineToolFn
-  } catch {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pathMod = require('node:path') as typeof import('node:path')
-    const root = pathMod.join(process.cwd(), 'node_modules', '@deepseek-ai', 'dsh-tools')
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return require(root).defineTool as DefineToolFn
-  }
+  const shellDir = process.env.DSH_HARBOR_SHELL_DIR ?? process.cwd()
+  const anchor = pathToFileURL(path.join(shellDir, '.harbor-anchor.js')).href
+  const shellRequire = createRequire(anchor)
+  return shellRequire('@deepseek-ai/dsh-tools').defineTool as DefineToolFn
 }
 
 export function apply(ctx: Context): void {
