@@ -9,7 +9,7 @@ export interface StewardOptions {
   port: number
   host: string
   bridgePort: number
-  /** absolute path of the shell directory, injected into the core via env */
+  /** absolute path of the shell (unpacked) root, injected into the core via env */
   shellDir: string
   patchPath?: string | null
 }
@@ -41,10 +41,19 @@ export class ProcessSteward extends EventEmitter<StewardEvents> {
     super()
   }
 
-  /** Resolve the official dsh bin.js: shell node_modules first, then global npm. */
+  /**
+   * Resolve the official dsh bin.js. Order: the injected shell (unpacked) root
+   * first (works in both dev and packaged mode), then the local dist layout,
+   * then the global npm root.
+   */
   resolveDshBin(): string {
-    const local = path.join(__dirname, '..', '..', 'node_modules', '@deepseek-ai', 'dsh', 'lib', 'bin.js')
-    if (fs.existsSync(local)) return local
+    const candidates = [
+      path.join(this.options.shellDir, 'node_modules', '@deepseek-ai', 'dsh', 'lib', 'bin.js'),
+      path.join(__dirname, '..', '..', 'node_modules', '@deepseek-ai', 'dsh', 'lib', 'bin.js'),
+    ]
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) return candidate
+    }
     try {
       const { execSync } = require('node:child_process') as typeof import('node:child_process')
       const root = execSync('npm root -g', { encoding: 'utf8' }).trim()

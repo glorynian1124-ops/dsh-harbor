@@ -11,7 +11,11 @@ import { registerToggleHotkey, unregisterHotkeys } from './hotkey'
 import { applyAutostart, isAutostartEnabled } from './autostart'
 import { startBridge, applyWindowAction } from './bridge'
 import { ensureDesktopBridgePatch } from './patch-manager'
+import { shellRootDir } from './paths'
 import { DEFAULTS, IPC, SHELL_VERSION } from '../shared/constants'
+
+// Stable AUMID so Windows toasts from the packaged app are always delivered.
+app.setAppUserModelId('com.glorynian.dsh-harbor')
 
 const config: HarborConfig = loadConfig()
 let win: BrowserWindow | null = null
@@ -67,7 +71,8 @@ function main(): void {
   app.whenReady().then(() => {
     win = createWindow(config)
     const bridgePort = config.bridgePort ?? DEFAULTS.bridgePort
-    const shellDir = app.getAppPath()
+    // Packaged mode: the core child process can only read unpacked files.
+    const shellDir = shellRootDir()
 
     // V2: desktop-bridge — generate the cordis patch and inject the bridge port
     // + shell dir into the core process so DSH plugins can call the desktop.

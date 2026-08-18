@@ -5,12 +5,20 @@ directories:
 files:
   - dist/**
   - package.json
+  - dsh-plugins/**
+  - build/icon.png
   - "!node_modules/.cache"
+# The shell spawns the dsh core as a CHILD node process, which cannot read
+# asar. Everything the core needs must live unpacked: the whole
+# @deepseek-ai/* scoped tree (dsh + its ~60 deps) plus the desktop-bridge
+# plugin. Unpacked files are excluded from the asar (no duplication).
 asarUnpack:
-  - node_modules/@deepseek-ai/dsh/**
+  - node_modules/@deepseek-ai/**
+  - dsh-plugins/**
 win:
   target:
     - nsis
+  icon: build/icon.png
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
