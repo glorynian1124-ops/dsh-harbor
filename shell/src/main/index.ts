@@ -9,6 +9,8 @@ import { CoreUpdater } from './core-updater'
 import { ShellUpdater } from './shell-updater'
 import { registerToggleHotkey, unregisterHotkeys } from './hotkey'
 import { applyAutostart, isAutostartEnabled } from './autostart'
+import { startBridge, applyWindowAction } from './bridge'
+import { ensureDesktopBridgePatch } from './patch-manager'
 import { DEFAULTS, IPC, SHELL_VERSION } from '../shared/constants'
 
 const config: HarborConfig = loadConfig()
@@ -64,8 +66,29 @@ function main(): void {
 
   app.whenReady().then(() => {
     win = createWindow(config)
-    steward = new ProcessSteward({ port: config.port, host: config.host })
+    const bridgePort = config.bridgePort ?? DEFAULTS.bridgePort
+
+    // V2: desktop-bridge — generate the cordis patch and inject the bridge port
+    // into the core process so DSH plugins can call the desktop.
+    const patchPath = ensureDesktopBridgePatch(app.getAppPath(), app.getPath('userData'))
+    steward = new ProcessSteward({
+      port: config.port,
+      host: config.host,
+      bridgePort,
+      patchPath,
+    })
     coreUpdater = new CoreUpdater(() => steward?.getCoreVersion() ?? null)
+
+    const bridge = startBridge(bridgePort, {
+      getStatus: () => ({
+        shellVersion: SHELL_VERSION,
+        coreVersion: steward?.getCoreVersion() ?? null,
+        coreUrl: steward?.getUrl() ?? null,
+        coreStatus: steward?.getStatus() ?? 'stopped',
+        windowVisible: win?.isVisible() ?? false,
+      }),
+      controlWindow: (action) => applyWindowAction(win, action),
+    })
 
     // Boot-time autostart applied once (user can toggle from the tray).
     if (config.autostart && !isAutostartEnabled()) {
@@ -150,6 +173,10 @@ function main(): void {
         .catch(() => undefined)
     })
     coreUpdater.on('error', (message) => dialog.showErrorBox('DSH Harbor', `核心更新失败：${message}`))
+
+    app.on('before-quit', () => {
+      bridge.close()
+    })
 
     steward.start()
   })

@@ -13,16 +13,21 @@ export const IPC = {
 /** dsh core versions the shell is tested against (warn-only gate). */
 export const SUPPORTED_DSH_PREFIX = '0.1.0'
 
-export const SHELL_VERSION = '0.1.0-v1.0'
+export const SHELL_VERSION = '0.2.0-v2.0'
 
 /** The official core npm package the shell spawns. */
 export const CORE_PACKAGE = '@deepseek-ai/dsh'
 
 export const HOTKEY = 'CommandOrControl+Alt+D'
 
+/** Env var injected into the dsh core process: where the bridge listens. */
+export const BRIDGE_PORT_ENV = 'DSH_HARBOR_BRIDGE_PORT'
+
 export const DEFAULTS = {
   port: 3210,
   host: '127.0.0.1',
+  /** desktop-bridge loopback HTTP port (core plugins call this) */
+  bridgePort: 3211,
   closeToTray: true,
   autostart: false,
   /** generic feed URL for shell updates; empty => use electron-builder publish config (GitHub Releases) */

@@ -3,11 +3,13 @@ import { EventEmitter } from 'node:events'
 import * as fs from 'node:fs'
 import * as http from 'node:http'
 import * as path from 'node:path'
-import { DEFAULTS } from '../shared/constants'
+import { BRIDGE_PORT_ENV, DEFAULTS } from '../shared/constants'
 
 export interface StewardOptions {
   port: number
   host: string
+  bridgePort: number
+  patchPath?: string | null
 }
 
 interface StewardEvents {
@@ -109,8 +111,17 @@ export class ProcessSteward extends EventEmitter<StewardEvents> {
     this.reportCoreVersion(bin)
 
     const args = ['--profile', 'web', '--host', this.options.host, '--port', String(this.options.port)]
+    if (this.options.patchPath) {
+      args.push('--patch', this.options.patchPath)
+      console.log('[harbor] core boot patch:', this.options.patchPath)
+    }
+    const env: NodeJS.ProcessEnv = {
+      ...process.env,
+      [BRIDGE_PORT_ENV]: String(this.options.bridgePort),
+    }
+
     this.spawnAttempt = 0
-    this.child = this.spawnDsh(bin, args)
+    this.child = this.spawnDsh(bin, args, env)
     this.startedAt = Date.now()
 
     let buffer = ''
@@ -120,7 +131,8 @@ export class ProcessSteward extends EventEmitter<StewardEvents> {
       if (m && !this.url) {
         this.url = `http://127.0.0.1:${m[1]}`
         this.waitUntilUp(this.url)
-      }    }
+      }
+    }
     this.child.stdout?.on('data', onData)
     this.child.stderr?.on('data', onData)
 
@@ -133,14 +145,14 @@ export class ProcessSteward extends EventEmitter<StewardEvents> {
   }
 
   /** Prefer system Node; fall back to Electron-as-Node when `node` is missing. */
-  private spawnDsh(bin: string, args: string[]): ChildProcess {
+  private spawnDsh(bin: string, args: string[], env: NodeJS.ProcessEnv): ChildProcess {
     if (this.spawnAttempt === 0) {
-      return spawn('node', [bin, ...args], { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true })
+      return spawn('node', [bin, ...args], { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true, env })
     }
     return spawn(process.execPath, [bin, ...args], {
       stdio: ['ignore', 'pipe', 'pipe'],
       windowsHide: true,
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+      env: { ...env, ELECTRON_RUN_AS_NODE: '1' },
     })
   }
 

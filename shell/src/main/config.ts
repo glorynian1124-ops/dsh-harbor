@@ -6,6 +6,7 @@ import { DEFAULTS } from '../shared/constants'
 export interface HarborConfig {
   port: number
   host: string
+  bridgePort?: number
   closeToTray: boolean
   autostart: boolean
   updateFeedUrl?: string
@@ -19,6 +20,7 @@ export function loadConfig(): HarborConfig {
   const fallback: HarborConfig = {
     port: DEFAULTS.port,
     host: DEFAULTS.host,
+    bridgePort: DEFAULTS.bridgePort,
     closeToTray: DEFAULTS.closeToTray,
     autostart: DEFAULTS.autostart,
   }
