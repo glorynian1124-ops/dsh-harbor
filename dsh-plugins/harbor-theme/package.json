@@ -1,0 +1,20 @@
+{
+  "name": "dsh-harbor-theme",
+  "version": "0.1.0",
+  "description": "DSH Harbor purple glassmorphism theme — a client plugin that overrides --dsw-* design tokens and adds glass surfaces via stable data-attribute selectors. No official UI code is touched.",
+  "private": true,
+  "type": "module",
+  "main": "lib/client.js",
+  "exports": {
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": []
+    }
+  },
+  "license": "MIT"
+}
