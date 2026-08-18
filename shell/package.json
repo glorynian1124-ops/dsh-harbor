@@ -1,9 +1,10 @@
 {
   "name": "dsh-harbor",
-  "version": "0.1.0-v1.0",
+  "version": "0.3.0",
   "description": "DSH Harbor — DeepSeek Harness desktop shell (shell/core separation, three-layer hot updates, plugin ecosystem preserved)",
   "main": "dist/main/index.js",
   "license": "MIT",
+  "author": "glorynian1124-ops",
   "scripts": {
     "build": "tsc -p .",
     "dev": "npm run build && electron .",

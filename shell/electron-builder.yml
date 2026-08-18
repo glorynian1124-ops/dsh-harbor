@@ -8,6 +8,11 @@ files:
   - dsh-plugins/**
   - build/icon.png
   - "!node_modules/.cache"
+# The shell spawns the dsh core as a CHILD node process (system Node), so the
+# core's native addons must stay compiled for the SYSTEM Node ABI — which npm
+# install already did. Rebuilding them for the Electron ABI is unnecessary
+# (the shell loads no native modules) and requires MSVC build tools.
+npmRebuild: false
 # The shell spawns the dsh core as a CHILD node process, which cannot read
 # asar. Everything the core needs must live unpacked: the whole
 # @deepseek-ai/* scoped tree (dsh + its ~60 deps) plus the desktop-bridge
